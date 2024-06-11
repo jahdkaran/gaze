@@ -76,13 +76,14 @@ class L2CS(nn.Module):
 class MobileNetV3Gaze(nn.Module):
     def __init__(self, num_bins):
         super(MobileNetV3Gaze, self).__init__()
-        # Create a MobileNetV3 small model
+        # Create a MobileNetV3 Small model
         self.mobilenet = torchvision.models.mobilenet_v3_small(pretrained=True)
         self.mobilenet.classifier = nn.Identity()  # Remove the original classifier
 
         # Define new classifiers for yaw and pitch
-        self.fc_yaw_gaze = nn.Linear(576, num_bins)  # Adjusted for MobileNetV3 small
-        self.fc_pitch_gaze = nn.Linear(576, num_bins)  # Adjusted for MobileNetV3 small
+        # Adjusted for actual output features of MobileNetV3 Small
+        self.fc_yaw_gaze = nn.Linear(576, num_bins)
+        self.fc_pitch_gaze = nn.Linear(576, num_bins)
 
     def forward(self, x):
         x = self.mobilenet(x)  # Output shape is (batch_size, 576)

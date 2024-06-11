@@ -160,11 +160,21 @@ if __name__ == '__main__':
     
     if data_set=="gaze360":
         model, pre_url = getArch_weights(args.arch, 90)
+        
+        # Optimizer gaze
+        optimizer_gaze = torch.optim.Adam([
+            {'params': get_ignored_params(model), 'lr': 0},
+            {'params': get_non_ignored_params(model), 'lr': args.lr},
+            {'params': get_fc_params(model), 'lr': args.lr}
+        ], args.lr)
+        
         if args.snapshot == '':
             load_filtered_state_dict(model, model_zoo.load_url(pre_url))
         else:
-            saved_state_dict = torch.load(args.snapshot)
-            model.load_state_dict(saved_state_dict)
+            checkpoint = torch.load(args.snapshot)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            optimizer_gaze.load_state_dict(checkpoint['optimizer_state_dict'])
+            epoch = checkpoint['epoch']
         
         
         model.cuda(gpu)
@@ -190,13 +200,6 @@ if __name__ == '__main__':
         idx_tensor = [idx for idx in range(90)]
         idx_tensor = Variable(torch.FloatTensor(idx_tensor)).cuda(gpu)
         
-
-        # Optimizer gaze
-        optimizer_gaze = torch.optim.Adam([
-            {'params': get_ignored_params(model), 'lr': 0},
-            {'params': get_non_ignored_params(model), 'lr': args.lr},
-            {'params': get_fc_params(model), 'lr': args.lr}
-        ], args.lr)
        
 
         configuration = f"\ntrain configuration, gpu_id={args.gpu_id}, batch_size={batch_size}, model_arch={args.arch}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
@@ -266,12 +269,13 @@ if __name__ == '__main__':
         
           
             if epoch % 1 == 0 and epoch < num_epochs:
-                print('Taking snapshot...',
-                    torch.save(model.state_dict(),
-                                output +'/'+
-                                '_epoch_' + str(epoch+1) + '.pkl')
-                    )
-            
+                print('Taking snapshot...')
+                torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer_gaze.state_dict(),
+                    # 'scheduler_state_dict': scheduler.state_dict(),  # Uncomment this if you have a scheduler
+                }, output + '/' + '_epoch_' + str(epoch+1) + '.pkl')
 
    
     elif data_set=="mpiigaze":
