@@ -128,7 +128,7 @@ def getArch_weights(arch, bins):
         pre_url = 'https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth'
     elif arch == 'MobileNetV2':
         model = MobileNetV2Gaze(bins)
-        pre_url = './mobilenetv2_0.5-eaa6f9ad.pth'
+        pre_url = './gaze/mobilenetv2_0.5-eaa6f9ad.pth'
     else:
         if arch != 'ResNet50':
             print('Invalid value for architecture is passed! '
