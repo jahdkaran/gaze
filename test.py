@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
         if not os.path.exists(evalpath):
             os.makedirs(evalpath)
-
+            
 
         # list all epochs for testing
         folder = os.listdir(snapshot_path)

@@ -11,7 +11,7 @@ from torchvision import transforms
 import torch.backends.cudnn as cudnn
 import torchvision
 
-from l2cs import L2CS,MobileNetV3Gaze, select_device, Gaze360, Mpiigaze
+from l2cs import L2CS,MobileNetV3Gaze,MobileNetV2Gaze, select_device, Gaze360, Mpiigaze
 
 
 def parse_args():
@@ -68,9 +68,9 @@ def parse_args():
 
 def get_ignored_params(model):
     # Generator function that yields ignored params.
-    if isinstance(model, MobileNetV3Gaze):
-        # Ignore the first few blocks of the MobileNetV3 model
-        b = [model.mobilenet.features[:1]]  # Replace 'n' with the number of blocks to freeze
+    if isinstance(model, MobileNetV3Gaze) or isinstance(model, MobileNetV2Gaze):
+        # Ignore the first few blocks of the MobileNet model
+        b = []  # Replace '1' with the number of blocks to freeze
     else:
         b = [model.conv1, model.bn1, model.fc_finetune]
     for i in range(len(b)):
@@ -82,9 +82,9 @@ def get_ignored_params(model):
 
 def get_non_ignored_params(model):
     # Generator function that yields params that will be optimized.
-    if isinstance(model, MobileNetV3Gaze):
+    if isinstance(model, MobileNetV3Gaze) or isinstance(model, MobileNetV2Gaze):
         # Optimize the later blocks of the MobileNetV3 model
-        b = [model.mobilenet.features[1:]]  # Replace 'n' with the number of blocks to freeze
+        b = [model.mobilenet.features[:]]  # Replace 'n' with the number of blocks to freeze
     else:
         b = [model.layer1, model.layer2, model.layer3, model.layer4]
     for i in range(len(b)):
@@ -126,6 +126,9 @@ def getArch_weights(arch, bins):
     elif arch == 'MobileNetV3':
         model = MobileNetV3Gaze(bins)
         pre_url = 'https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth'
+    elif arch == 'MobileNetV2':
+        model = MobileNetV2Gaze(bins)
+        pre_url = './mobilenetv2_0.5-eaa6f9ad.pth'
     else:
         if arch != 'ResNet50':
             print('Invalid value for architecture is passed! '
@@ -160,7 +163,7 @@ if __name__ == '__main__':
     
     if data_set=="gaze360":
         model, pre_url = getArch_weights(args.arch, 90)
-        current_epoch = 0
+        current_epoch = -1
         
         # Optimizer gaze
         optimizer_gaze = torch.optim.Adam([
@@ -170,7 +173,12 @@ if __name__ == '__main__':
         ], args.lr)
         
         if args.snapshot == '':
-            load_filtered_state_dict(model, model_zoo.load_url(pre_url))
+            if os.path.isfile(pre_url):
+                if not isinstance (model, MobileNetV2Gaze):
+                    state_dict = torch.load(pre_url)
+                    model.load_state_dict(state_dict)
+            else: 
+                load_filtered_state_dict(model, model_zoo.load_url(pre_url))
         else:
             checkpoint = torch.load(args.snapshot, map_location='cpu')  # Load to CPU first for safety
             model.load_state_dict(checkpoint['model_state_dict'])

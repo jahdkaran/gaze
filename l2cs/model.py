@@ -5,7 +5,6 @@ import math
 import torch.nn.functional as F
 import torchvision
 
-
 class L2CS(nn.Module):
     def __init__(self, block, layers, num_bins):
         self.inplanes = 64
@@ -71,8 +70,6 @@ class L2CS(nn.Module):
         return pre_yaw_gaze, pre_pitch_gaze
     
 
-
-
 class MobileNetV3Gaze(nn.Module):
     def __init__(self, num_bins):
         super(MobileNetV3Gaze, self).__init__()
@@ -93,4 +90,24 @@ class MobileNetV3Gaze(nn.Module):
         pre_yaw_gaze = self.fc_yaw_gaze(x)
         pre_pitch_gaze = self.fc_pitch_gaze(x)
 
+        return pre_yaw_gaze, pre_pitch_gaze
+    
+class MobileNetV2Gaze(nn.Module):
+    def __init__(self, num_bins):
+        super(MobileNetV2Gaze, self).__init__()
+        # Create a MobileNetV2 model
+        self.mobilenet = torchvision.models.mobilenet_v2(weights=None, width_mult=0.5)
+        
+                # Modify the classifier for gaze estimation
+        self.features = self.mobilenet.features
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc_yaw_gaze = nn.Linear(1280 , num_bins)  # MobileNetV2's last channel size is 1280
+        self.fc_pitch_gaze = nn.Linear(1280  , num_bins)
+        
+    def forward(self, x):
+        x = self.features(x)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        pre_yaw_gaze = self.fc_yaw_gaze(x)
+        pre_pitch_gaze = self.fc_pitch_gaze(x)
         return pre_yaw_gaze, pre_pitch_gaze
