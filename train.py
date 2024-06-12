@@ -171,10 +171,14 @@ if __name__ == '__main__':
         if args.snapshot == '':
             load_filtered_state_dict(model, model_zoo.load_url(pre_url))
         else:
-            checkpoint = torch.load(args.snapshot, map_location=lambda storage, loc: storage.cuda(gpu))
+            checkpoint = torch.load(args.snapshot, map_location='cpu')  # Load to CPU first for safety
             model.load_state_dict(checkpoint['model_state_dict'])
+            model.cuda(gpu)  # Ensure model is on GPU
             optimizer_gaze.load_state_dict(checkpoint['optimizer_state_dict'])
-            epoch = checkpoint['epoch']
+            for state in optimizer_gaze.state.values():
+                for k, v in state.items():
+                    if isinstance(v, torch.Tensor):
+                        state[k] = v.cuda(gpu)  # Move optimizer state to GPU
         
         
         model.cuda(gpu)
