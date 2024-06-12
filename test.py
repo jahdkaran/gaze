@@ -133,7 +133,8 @@ if __name__ == '__main__':
             for epochs in folder:
                 # Base network structure
                 model=getArch(arch, 90)
-                saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
+                checkpoint = torch.load(os.path.join(snapshot_path,epochs))
+                saved_state_dict = checkpoint['model_state_dict']
                 model.load_state_dict(saved_state_dict)
                 model.cuda(gpu)
                 model.eval()
