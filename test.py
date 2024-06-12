@@ -45,6 +45,9 @@ def parse_args():
         '--gpu',dest='gpu_id', help='GPU device id to use [0]',
         default="0", type=str)
     parser.add_argument(
+        '--bins', dest='bins', help='Number of bins for discretization.',
+        default=90, type=int)
+    parser.add_argument(
         '--batch_size', dest='batch_size', help='Batch size.',
         default=100, type=int)
     parser.add_argument(
