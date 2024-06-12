@@ -160,6 +160,7 @@ if __name__ == '__main__':
     
     if data_set=="gaze360":
         model, pre_url = getArch_weights(args.arch, 90)
+        current_epoch = 0
         
         # Optimizer gaze
         optimizer_gaze = torch.optim.Adam([
@@ -175,6 +176,7 @@ if __name__ == '__main__':
             model.load_state_dict(checkpoint['model_state_dict'])
             model.cuda(gpu)  # Ensure model is on GPU
             optimizer_gaze.load_state_dict(checkpoint['optimizer_state_dict'])
+            current_epoch = checkpoint['epoch']
             for state in optimizer_gaze.state.values():
                 for k, v in state.items():
                     if isinstance(v, torch.Tensor):
@@ -208,7 +210,7 @@ if __name__ == '__main__':
 
         configuration = f"\ntrain configuration, gpu_id={args.gpu_id}, batch_size={batch_size}, model_arch={args.arch}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
         print(configuration)
-        for epoch in range(num_epochs):
+        for epoch in range(current_epoch + 1, num_epochs):
             sum_loss_pitch_gaze = sum_loss_yaw_gaze = iter_gaze = 0
 
             
