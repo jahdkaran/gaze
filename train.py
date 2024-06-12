@@ -171,7 +171,7 @@ if __name__ == '__main__':
         if args.snapshot == '':
             load_filtered_state_dict(model, model_zoo.load_url(pre_url))
         else:
-            checkpoint = torch.load(args.snapshot)
+            checkpoint = torch.load(args.snapshot, map_location=lambda storage, loc: storage.cuda(gpu))
             model.load_state_dict(checkpoint['model_state_dict'])
             optimizer_gaze.load_state_dict(checkpoint['optimizer_state_dict'])
             epoch = checkpoint['epoch']
