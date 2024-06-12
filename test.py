@@ -90,7 +90,6 @@ if __name__ == '__main__':
     snapshot_path = args.snapshot
     bins=args.bins
     angle=args.angle
-    bin_width=args.bin_width
 
     transformations = transforms.Compose([
         transforms.Resize(448),
