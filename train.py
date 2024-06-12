@@ -172,6 +172,9 @@ if __name__ == '__main__':
             {'params': get_fc_params(model), 'lr': args.lr}
         ], args.lr)
         
+        # sheduler gaze 
+        scheduler_gaze = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_gaze, T_max=10, eta_min=0.00001)
+        
         if args.snapshot == '':
             if os.path.isfile(pre_url):
                 if not isinstance (model, MobileNetV2Gaze):
@@ -184,6 +187,7 @@ if __name__ == '__main__':
             model.load_state_dict(checkpoint['model_state_dict'])
             model.cuda(gpu)  # Ensure model is on GPU
             optimizer_gaze.load_state_dict(checkpoint['optimizer_state_dict'])
+            scheduler_gaze.load_state_dict(checkpoint['scheduler_state_dict'])
             current_epoch = checkpoint['epoch']
             for state in optimizer_gaze.state.values():
                 for k, v in state.items():
@@ -265,7 +269,7 @@ if __name__ == '__main__':
                 optimizer_gaze.zero_grad(set_to_none=True)
                 torch.autograd.backward(loss_seq, grad_seq)
                 optimizer_gaze.step()
-                # scheduler.step()
+                scheduler_gaze.step()
                 
                 iter_gaze += 1
 
@@ -288,6 +292,7 @@ if __name__ == '__main__':
                     'epoch': epoch,
                     'model_state_dict': model.state_dict(),
                     'optimizer_state_dict': optimizer_gaze.state_dict(),
+                    'sheduler_state_dict': scheduler_gaze.state_dict()
                     # 'scheduler_state_dict': scheduler.state_dict(),  # Uncomment this if you have a scheduler
                 }, output + '/' + '_epoch_' + str(epoch+1) + '.pkl')
 
