@@ -187,7 +187,7 @@ if __name__ == '__main__':
             model.load_state_dict(checkpoint['model_state_dict'])
             model.cuda(gpu)  # Ensure model is on GPU
             optimizer_gaze.load_state_dict(checkpoint['optimizer_state_dict'])
-            scheduler_gaze.load_state_dict(checkpoint['scheduler_state_dict'])
+            scheduler_gaze.load_state_dict(checkpoint['sheduler_state_dict'])
             current_epoch = checkpoint['epoch']
             for state in optimizer_gaze.state.values():
                 for k, v in state.items():
