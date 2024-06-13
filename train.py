@@ -69,28 +69,28 @@ def parse_args():
 def get_ignored_params(model):
     # Generator function that yields ignored params.
     if isinstance(model, MobileNetV3Gaze) or isinstance(model, MobileNetV2Gaze):
-        # Ignore the first few blocks of the MobileNet model
-        b = []  # Replace '1' with the number of blocks to freeze
+        # Ignore the first 6 blocks of the MobileNet model
+        b = [model.mobilenet.features[:7]]  # Blocks are 0-indexed, so block 6 is the 7th block
     else:
         b = [model.conv1, model.bn1, model.fc_finetune]
     for i in range(len(b)):
         for module_name, module in b[i].named_modules():
             if 'bn' in module_name:
-                module.eval()
+                module.eval()  # Set batchnorm layers to evaluation mode
             for name, param in module.named_parameters():
                 yield param
 
 def get_non_ignored_params(model):
     # Generator function that yields params that will be optimized.
     if isinstance(model, MobileNetV3Gaze) or isinstance(model, MobileNetV2Gaze):
-        # Optimize the later blocks of the MobileNetV3 model
-        b = [model.mobilenet.features[:]]  # Replace 'n' with the number of blocks to freeze
+        # Optimize the blocks of the MobileNet model from block 7 onwards
+        b = [model.mobilenet.features[7:]]  # Start from block 7 to the end
     else:
         b = [model.layer1, model.layer2, model.layer3, model.layer4]
     for i in range(len(b)):
         for module_name, module in b[i].named_modules():
             if 'bn' in module_name:
-                module.eval()
+                module.eval()  # Set batchnorm layers to evaluation mode
             for name, param in module.named_parameters():
                 yield param
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
         ], args.lr)
         
         # sheduler gaze 
-        scheduler_gaze = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_gaze, T_max=10, eta_min=0.00001)
+        scheduler_gaze = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_gaze, T_max=25, eta_min=0.00001)
         
         if args.snapshot == '':
             if os.path.isfile(pre_url):
