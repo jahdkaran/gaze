@@ -73,26 +73,26 @@ def get_ignored_params(model):
         b = []  # Blocks are 0-indexed, so block 6 is the 7th block
     else:
         b = [model.conv1, model.bn1, model.fc_finetune]
-        for i in range(len(b)):
-            for module_name, module in b[i].named_modules():
-                if 'bn' in module_name:
-                    module.eval()  # Set batchnorm layers to evaluation mode
-                for name, param in module.named_parameters():
-                    yield param
+    for i in range(len(b)):
+        for module_name, module in b[i].named_modules():
+            if 'bn' in module_name:
+                module.eval()  # Set batchnorm layers to evaluation mode
+            for name, param in module.named_parameters():
+                yield param
 
 def get_non_ignored_params(model):
     # Generator function that yields params that will be optimized.
     if isinstance(model, MobileNetV3Gaze) or isinstance(model, MobileNetV2Gaze):
-        for name, param in model.named_parameters():
-            yield param
+        # Optimize the blocks of the MobileNet model from block 7 onwards
+        b = [model.mobilenet.features[:]]  # Start from block 7 to the end
     else:
         b = [model.layer1, model.layer2, model.layer3, model.layer4]
-        for i in range(len(b)):
-            for module_name, module in b[i].named_modules():
-                if 'bn' in module_name:
-                    module.eval()  # Set batchnorm layers to evaluation mode
-                for name, param in module.named_parameters():
-                    yield param
+    for i in range(len(b)):
+        for module_name, module in b[i].named_modules():
+            if 'bn' in module_name:
+                module.eval()  # Set batchnorm layers to evaluation mode
+            for name, param in module.named_parameters():
+                yield param
 
 def get_fc_params(model):
     # Generator function that yields fc layer params.
