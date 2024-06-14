@@ -87,12 +87,12 @@ def get_non_ignored_params(model):
             yield param
     else:
         b = [model.layer1, model.layer2, model.layer3, model.layer4]
-    for i in range(len(b)):
-        for module_name, module in b[i].named_modules():
-            if 'bn' in module_name:
-                module.eval()  # Set batchnorm layers to evaluation mode
-            for name, param in module.named_parameters():
-                yield param
+        for i in range(len(b)):
+            for module_name, module in b[i].named_modules():
+                if 'bn' in module_name:
+                    module.eval()  # Set batchnorm layers to evaluation mode
+                for name, param in module.named_parameters():
+                    yield param
 
 def get_fc_params(model):
     # Generator function that yields fc layer params.
