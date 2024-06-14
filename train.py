@@ -70,7 +70,7 @@ def get_ignored_params(model):
     # Generator function that yields ignored params.
     if isinstance(model, MobileNetV3Gaze) or isinstance(model, MobileNetV2Gaze):
         # Ignore the first 6 blocks of the MobileNet model
-        b = [model.mobilenet.features[:7]]  # Blocks are 0-indexed, so block 6 is the 7th block
+        b = []  # Blocks are 0-indexed, so block 6 is the 7th block
     else:
         b = [model.conv1, model.bn1, model.fc_finetune]
     for i in range(len(b)):
@@ -83,8 +83,8 @@ def get_ignored_params(model):
 def get_non_ignored_params(model):
     # Generator function that yields params that will be optimized.
     if isinstance(model, MobileNetV3Gaze) or isinstance(model, MobileNetV2Gaze):
-        # Optimize the blocks of the MobileNet model from block 7 onwards
-        b = [model.mobilenet.features[7:]]  # Start from block 7 to the end
+        for name, param in model.named_parameters():
+            yield param
     else:
         b = [model.layer1, model.layer2, model.layer3, model.layer4]
     for i in range(len(b)):
@@ -128,7 +128,7 @@ def getArch_weights(arch, bins):
         pre_url = 'https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth'
     elif arch == 'MobileNetV2':
         model = MobileNetV2Gaze(bins)
-        pre_url = './gaze/mobilenetv2_0.5-eaa6f9ad.pth'
+        pre_url = 'https://download.pytorch.org/models/mobilenet_v2-b0353104.pth'
     else:
         if arch != 'ResNet50':
             print('Invalid value for architecture is passed! '

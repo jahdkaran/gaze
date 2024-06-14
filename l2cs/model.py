@@ -96,7 +96,7 @@ class MobileNetV2Gaze(nn.Module):
     def __init__(self, num_bins):
         super(MobileNetV2Gaze, self).__init__()
         # Create a MobileNetV2 model
-        self.mobilenet = torchvision.models.mobilenet_v2(weights=None, width_mult=0.5)
+        self.mobilenet = torchvision.models.mobilenet_v2(weights=torchvision.models.MobileNet_V2_Weights.IMAGENET1K_V2)
         
                 # Modify the classifier for gaze estimation
         self.features = self.mobilenet.features
