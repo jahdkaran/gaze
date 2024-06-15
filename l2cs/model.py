@@ -96,13 +96,13 @@ class MobileNetV2Gaze(nn.Module):
     def __init__(self, num_bins):
         super(MobileNetV2Gaze, self).__init__()
         # Create a MobileNetV2 model
-        self.mobilenet = torchvision.models.mobilenet_v2(width_mult=0.5)
+        self.mobilenet = torchvision.models.mobilenet_v2(weights=torchvision.models.MobileNet_V2_Weights.IMAGENET1K_V2)
         
                 # Modify the classifier for gaze estimation
         self.features = self.mobilenet.features
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc_yaw_gaze = nn.Linear(1280  , num_bins)  # MobileNetV2's last channel size is 1280
-        self.fc_pitch_gaze = nn.Linear(1280 , num_bins)
+        self.fc_yaw_gaze = nn.Linear(1280 , num_bins)  # MobileNetV2's last channel size is 1280
+        self.fc_pitch_gaze = nn.Linear(1280  , num_bins)
         
     def forward(self, x):
         x = self.features(x)

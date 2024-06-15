@@ -129,7 +129,7 @@ def getArch_weights(arch, bins):
     elif arch == 'MobileNetV2':
         model = MobileNetV2Gaze(bins)
         # mnet v2 0.5 
-        pre_url = './gaze/mobilenetv2_0.5-eaa6f9ad.pth'
+        pre_url = 'https://download.pytorch.org/models/mobilenet_v2-b0353104.pth'
     else:
         if arch != 'ResNet50':
             print('Invalid value for architecture is passed! '
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     
     
     transformations = transforms.Compose([
-        transforms.Resize(224),
+        transforms.Resize(112),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
