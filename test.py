@@ -9,7 +9,7 @@ from torchvision import transforms
 import torch.backends.cudnn as cudnn
 import torchvision
 
-from l2cs import select_device, natural_keys, gazeto3d, angular, getArch, L2CS, Gaze360, Mpiigaze
+from l2cs import select_device, natural_keys, gazeto3d, angular, getArch, L2CS, Gaze360, Mpiigaze, MobileNetV2Gaze
 
 
 def parse_args():
@@ -72,6 +72,8 @@ def getArch(arch,bins):
         model = L2CS( torchvision.models.resnet.Bottleneck,[3, 4, 23, 3], bins)
     elif arch == 'ResNet152':
         model = L2CS( torchvision.models.resnet.Bottleneck,[3, 8, 36, 3], bins)
+    elif arch == "MobileNetV2": 
+        model = MobileNetV2Gaze(bins)
     else:
         if arch != 'ResNet50':
             print('Invalid value for architecture is passed! '
